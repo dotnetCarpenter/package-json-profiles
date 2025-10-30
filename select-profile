@@ -11,7 +11,7 @@ var profileFilePath = './packages/' + profile + '.package.json';
 
 if (!fs.existsSync(profileFilePath)) {
 	console.log('No file matching that profile exists (expected ', profileFilePath, ')');
-	return;
+	process.exit(1);
 }
 
 var matchingPackageFile = fs.readFileSync(profileFilePath);
