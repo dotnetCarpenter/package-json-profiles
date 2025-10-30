@@ -3,5 +3,6 @@
 	"profile": "remote",
 	"scripts": {
 		"start": "node ./server-remote.js"
-	}
+	},
+	"defaultProfile": "remote"
 }
