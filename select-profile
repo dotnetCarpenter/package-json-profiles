@@ -3,7 +3,7 @@ var fs = require('fs');
 
 if (process.argv.length < 3) {
 	console.log('Too few arguments; please specify a profile');
-	return;
+	process.exit(2);
 }
 
 var profile = process.argv[2];
