@@ -1,18 +1,51 @@
 #!/usr/bin/env node
 var fs = require('fs');
+const EOF = '\n'; // End Of File
+
+var profile;
+var packageJson = readJsonFile('./package.json');
 
 if (process.argv.length < 3) {
-	console.log('Too few arguments; please specify a profile');
-	return;
+	if (packageJson.defaultProfile) {
+		profile = packageJson.defaultProfile;
+	} else {
+		console.log('Too few arguments; please specify a profile');
+		process.exit(2);
+	}
+} else {
+	profile = process.argv[2];
 }
 
-var profile = process.argv[2];
 var profileFilePath = './packages/' + profile + '.package.json';
 
 if (!fs.existsSync(profileFilePath)) {
 	console.log('No file matching that profile exists (expected ', profileFilePath, ')');
-	return;
+	process.exit(1);
+} else if (profile == null) {
+	console.log('No profile specied; please specify a profile as argument or defaultProfile in package.json');
+	process.exit(2);
 }
 
-var matchingPackageFile = fs.readFileSync(profileFilePath);
-fs.writeFileSync('./package.json', matchingPackageFile);
+var matchingPackageFile = readJsonFile(profileFilePath);
+
+if (packageJson.defaultProfile) {
+	matchingPackageFile.defaultProfile = packageJson.defaultProfile;
+}
+
+fs.writeFileSync('./package.json', JSON.stringify(matchingPackageFile, null, '\t') + EOF);
+
+function readJsonFile (path) {
+	return JSON.parse(fs.readFileSync(path));
+}
+
+/** tests
+ * ./select-profile && npm start			-> Too few arguments; please specify a profile
+ * ./select-profile invalid && npm start	-> No file matching that profile exists (expected  ./packages/invalid.package.json )
+ * ./select-profile remote && npm start		-> Hello from server-remote.js
+ * ./select-profile local && npm start		-> Hi from server-local.js
+ *
+ * ## With defaultProfile ##
+ * ./select-profile && npm start			-> Hello from server-remote.js
+ * ./select-profile invalid && npm start	-> No file matching that profile exists (expected  ./packages/invalid.package.json )
+ * ./select-profile local && npm start		-> Hi from server-local.js
+ */
